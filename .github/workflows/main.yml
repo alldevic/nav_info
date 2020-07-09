@@ -1,0 +1,24 @@
+
+name: deploy to stage
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+      - name: Create .env
+        run: cp /projects/_config/nav_info/.env ./.env
+      - name: Fix docker-compose
+        run: | 
+          rm -f ./docker-compose.yml
+          cp /projects/_config/nav_info/docker-compose.yml ./docker-compose.yml
+      - name: Create volumes
+        run: |
+          docker volume create nav_info_db_data
+      - name: Make up
+        run: make up
