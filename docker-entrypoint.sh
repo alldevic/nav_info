@@ -2,7 +2,11 @@
 
 set -o errexit
 set -o pipefail
-cmd="$@"
+
+if [[ ${DEBUGPY} == 'TRUE' ]] || [[ ${DEBUGPY} == 'True' ]] || [[ ${DEBUGPY} == '1' ]]; then
+    echo >&2 "Starting debug server with debugpy..."
+    python3 -m debugpy --listen 0.0.0.0:5678 \
+        ./manage.py runserver 0.0.0.0:8000 &
 
 function postgres_ready() {
     python3 <<END
@@ -45,7 +49,9 @@ python3 manage.py migrate
 echo >&2 "Collect static..."
 python3 manage.py collectstatic --noinput
 
-if [[ ${DEBUG} == 'TRUE' ]] || [[ ${DEBUG} == 'True' ]] || [[ ${DEBUG} == '1' ]]; then
+if [[ ${DEBUGPY} == 'TRUE' ]] || [[ ${DEBUGPY} == 'True' ]] || [[ ${DEBUGPY} == '1' ]]; then
+    wait
+elif [[ ${DEBUG} == 'TRUE' ]] || [[ ${DEBUG} == 'True' ]] || [[ ${DEBUG} == '1' ]]; then
     echo >&2 "Starting debug server..."
     exec python3 manage.py runserver 0.0.0.0:8000
 else
@@ -55,4 +61,5 @@ else
         --access-logfile - \
         --workers 3 \
         "$@"
+fi
 fi
