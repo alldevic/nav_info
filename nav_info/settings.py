@@ -88,11 +88,14 @@ WSGI_APPLICATION = 'nav_info.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': get_env('POSTGRES_DB', 'postgres_db'),
+        'USER': get_env('POSTGRES_USER', 'postgresuser'),
+        'PASSWORD': get_env('POSTGRES_PASSWORD', 'mysecretpass'),
+        'HOST': get_env('POSTGRES_HOST', 'localhost'),
+        'PORT': 5432
     }
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
