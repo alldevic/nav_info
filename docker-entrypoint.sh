@@ -6,7 +6,15 @@ set -o pipefail
 if [[ ${DEBUGPY} == 'TRUE' ]] || [[ ${DEBUGPY} == 'True' ]] || [[ ${DEBUGPY} == '1' ]]; then
     echo >&2 "Starting debug server with debugpy..."
     python3 -m debugpy --listen 0.0.0.0:5678 \
-        ./manage.py runserver 0.0.0.0:8000 &
+        -m uvicorn nav_info.asgi:application \
+            --host 0.0.0.0 \
+            --port 8000 \
+            --access-log \
+            --use-colors \
+            --log-level info \
+            --lifespan off \
+            --reload &
+fi
 
 function postgres_ready() {
     python3 <<END
@@ -53,13 +61,21 @@ if [[ ${DEBUGPY} == 'TRUE' ]] || [[ ${DEBUGPY} == 'True' ]] || [[ ${DEBUGPY} == 
     wait
 elif [[ ${DEBUG} == 'TRUE' ]] || [[ ${DEBUG} == 'True' ]] || [[ ${DEBUG} == '1' ]]; then
     echo >&2 "Starting debug server..."
-    exec python3 manage.py runserver 0.0.0.0:8000
+    exec python3 -m uvicorn nav_info.asgi:application \
+            --host 0.0.0.0 \
+            --port 8000 \
+            --access-log \
+            --use-colors \
+            --log-level info \
+            --lifespan off \
+            --reload
 else
     echo >&2 "Starting Gunicorn..."
-    exec hypercorn nav_info.asgi:application \
-        --bind 0.0.0.0:8000 \
+    exec gunicorn nav_info.asgi:application \
+        -k uvicorn.workers.UvicornWorker \
         --access-logfile - \
-        --workers 3 \
-        "$@"
+        --name nav_info \
+        --bind 0.0.0.0:8000 \
+        --workers=3
 fi
 fi

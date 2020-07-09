@@ -4,7 +4,7 @@ ENV PYTHONUNBUFFERED 1
 RUN mkdir -p /app
 RUN apk add --no-cache python3 postgresql-libs py3-psycopg2==2.8.5-r0 py3-pip
 RUN if [ ! -e /usr/bin/python ]; then ln -sf python3 /usr/bin/python ; fi 
-RUN apk add --no-cache --virtual .build-deps python3-dev postgresql-dev 
+RUN apk add --no-cache --virtual .build-deps python3-dev postgresql-dev build-base
 RUN pip install --disable-pip-version-check --no-cache-dir --ignore-installed pipenv
 WORKDIR /app
 COPY Pipfile Pipfile.lock /app/
@@ -14,6 +14,7 @@ RUN if [[ "$DEBUG" == "TRUE" ]] || [[ "$DEBUG" == "True" ]] || [[ "$DEBUG" == "1
     pipenv install --system --deploy --ignore-pipfile --dev; \
     else \
     echo "Install only PROD packages"; \
+    apk add --no-cache py3-gunicorn; \
     pipenv install --system --deploy --ignore-pipfile; \
     pip uninstall pipenv virtualenv virtualenv-clone pip -y; \
     fi && \
@@ -39,7 +40,7 @@ RUN if [[ "$DEBUG" == "TRUE" ]] || [[ "$DEBUG" == "True" ]] || [[ "$DEBUG" == "1
     find /usr/lib/python*/site-packages/django/contrib/sites/locale ! -name ru ! -name en* -mindepth 1 -maxdepth 1 -type d -print0 | xargs -0 rm -rf && \
     if [[ "$DEBUG" != "TRUE" ]] && [[ "$DEBUG" != "True" ]] && [[ "$DEBUG" != "1" ]]; then \
     find /usr/lib/python*/* | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf; \
-    python3 -m compileall -b /usr/lib/python*; \
+    python3 -m compileall -q -b /usr/lib/python*; \
     find /usr/lib/python*/* -name "*.py"|xargs rm -rf; \
     find /usr/lib/python*/* -name '*.c' -delete; \
     find /usr/lib/python*/* -name '*.pxd' -delete; \
