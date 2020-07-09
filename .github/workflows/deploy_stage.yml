@@ -19,6 +19,6 @@ jobs:
           cp /projects/_config/nav_info/docker-compose.yml ./docker-compose.yml
       - name: Create volumes
         run: |
-          docker volume create nav_info_db_data
+          docker volume create nav_db_data
       - name: Make up
         run: make up
