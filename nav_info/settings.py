@@ -143,10 +143,12 @@ SWAGGER_SETTINGS = {
     },
     'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_yasg.inspectors.SwaggerAutoSchema',
     'USE_SESSION_AUTH': False,
-    'JSON_EDITOR': True,
+    'VALIDATOR_URL': None,
+
 }
 
 USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
