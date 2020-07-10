@@ -35,7 +35,7 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
-
+    'user_profile.apps.UserProfileConfig',
 ]
 
 if DEBUG:
@@ -98,6 +98,8 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = 'user_profile.UserProfile'
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -126,3 +128,16 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'api_key': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization'
+        }
+    },
+    'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_yasg.inspectors.SwaggerAutoSchema',
+    'USE_SESSION_AUTH': False,
+    'JSON_EDITOR': True,
+}
