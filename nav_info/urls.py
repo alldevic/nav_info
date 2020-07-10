@@ -29,6 +29,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', schema_view.with_ui('swagger',
                                      cache_timeout=0), name='docs-ui'),
+    path('api/auth/', include('djoser.urls.authtoken')),
+    # path('api/raw/'. include('soap_client.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:

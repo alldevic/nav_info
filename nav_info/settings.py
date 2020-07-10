@@ -1,5 +1,6 @@
 import os
 from os import environ
+from django.urls import reverse_lazy
 
 
 def get_env(key, default=None):
@@ -31,11 +32,14 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',
     'drf_yasg',
 ]
 
 LOCAL_APPS = [
     'user_profile.apps.UserProfileConfig',
+    'soap_client',
 ]
 
 if DEBUG:
@@ -72,7 +76,7 @@ ROOT_URLCONF = 'nav_info.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -140,4 +144,12 @@ SWAGGER_SETTINGS = {
     'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_yasg.inspectors.SwaggerAutoSchema',
     'USE_SESSION_AUTH': False,
     'JSON_EDITOR': True,
+}
+
+USE_X_FORWARDED_HOST = True
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
 }
