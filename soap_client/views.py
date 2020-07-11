@@ -9,7 +9,7 @@ from rest_framework.response import Response
 import zeep
 from nav_info import settings
 from soap_client.serializers import (
-    DeviceSerializer, DriverSerializer, DeviceGroupSerializer)
+    DeviceSerializer, DriverSerializer, DeviceGroupSerializer, GeoZoneSerializer)
 from zeep.cache import InMemoryCache
 from zeep.transports import Transport
 
@@ -60,4 +60,16 @@ class RawViewSet(viewsets.ViewSet):
         """
         soap_res = self.client.service.getAllDeviceGroups()
         serializer = DeviceGroupSerializer(soap_res, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False)
+    @swagger_auto_schema(responses={
+        200: GeoZoneSerializer(many=True)
+    })
+    def getAllGeoZones(self, request):
+        """
+        Метод возвращает список геозон, определенных для компании. Идентификаторы сквозные
+        """
+        soap_res = self.client.service.getAllGeoZones()
+        serializer = GeoZoneSerializer(soap_res, many=True)
         return Response(serializer.data)

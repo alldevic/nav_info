@@ -71,9 +71,10 @@ class Device(models.Model):
                                    blank=True,
                                    null=True)
 
-    groupIds = ArrayField(models.IntegerField("groupIds",
+    groupIds = ArrayField(models.IntegerField("groupId",
                                               blank=True,
                                               null=True),
+                          name="groupIds",
                           help_text="Список ID групп (клиентов), к которым относится ТС",
                           blank=True,
                           null=True)
@@ -193,3 +194,65 @@ class DeviceGroup(models.Model):
 
     def __str__(self):
         return self.reg_number or self.name
+
+
+class Point(models.Model):
+    """
+    Широта и долгота (координата)
+    """
+    id = models.UUIDField(primary_key=True,
+                          default=uuid.uuid4,
+                          editable=False)
+
+    lon = models.FloatField("lon",
+                            help_text="Долгота",
+                            blank=True,
+                            null=True)
+
+    lat = models.FloatField("lat",
+                            help_text="Широта",
+                            blank=True,
+                            null=True)
+
+    class Meta(object):
+        verbose_name = "точка"
+        verbose_name_plural = "точки"
+
+    def __str__(self):
+        return f"{self.lat} {self.lon}"
+
+
+class GeoZone(models.Model):
+    """
+    Структура, содержащая данные по геозоне
+    """
+    uuid = models.UUIDField(primary_key=True,
+                            default=uuid.uuid4,
+                            editable=False)
+
+    id = models.IntegerField("id",
+                             help_text="Идентификатор геозоны",
+                             blank=True,
+                             null=True)
+
+    name = models.CharField("name",
+                            help_text="Текстовое описание",
+                            max_length=150,
+                            blank=True,
+                            null=True)
+
+    points = ArrayField(models.ForeignKey(Point,
+                                          on_delete=models.CASCADE,
+                                          blank=True,
+                                          null=True),
+                        name="points",
+                        help_text="Координаты полигона геозоны",
+                        blank=True,
+                        null=True)
+
+    class Meta(object):
+        verbose_name = "геозона"
+        verbose_name_plural = "геозоны"
+
+    def __str__(self):
+        return self.name
