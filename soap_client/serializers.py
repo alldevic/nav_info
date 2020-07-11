@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from soap_client.models import (Driver, Device)
+from soap_client.models import (Driver, Device, DeviceGroup)
 
 
 class DriverSerializer(serializers.ModelSerializer):
@@ -33,4 +33,15 @@ class DeviceSerializer(serializers.ModelSerializer):
             'brand',
             'description',
             'groupIds',
+        )
+
+
+class DeviceGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeviceGroup
+        fields = (
+            'id',
+            'name',
+            'description',
+            'parentId',
         )

@@ -12,11 +12,10 @@ class Device(models.Model):
                             default=uuid.uuid4,
                             editable=False)
 
-    id = models.CharField("id",
-                          help_text="Идентификатор устройства слежения",
-                          max_length=150,
-                          blank=True,
-                          null=True)
+    id = models.IntegerField("id",
+                             help_text="Идентификатор устройства слежения",
+                             blank=True,
+                             null=True)
 
     name = models.CharField("name",
                             help_text="Текстовое наименование устройства (ТС)",
@@ -96,11 +95,10 @@ class Driver(models.Model):
                             default=uuid.uuid4,
                             editable=False)
 
-    id = models.CharField("id",
-                          help_text="Идентификатор водителя",
-                          max_length=150,
-                          blank=True,
-                          null=True)
+    id = models.IntegerField("id",
+                             help_text="Идентификатор водителя",
+                             blank=True,
+                             null=True)
 
     fname = models.CharField("fname",
                              help_text="Имя водителя",
@@ -156,3 +154,42 @@ class Driver(models.Model):
 
     def __str__(self):
         return f"{self.lname} {self.fname} {self.mname}"
+
+
+class DeviceGroup(models.Model):
+    """
+    Структура содержит данные по группе (клиенту).
+    """
+
+    uuid = models.UUIDField(primary_key=True,
+                            default=uuid.uuid4,
+                            editable=False)
+
+    id = models.IntegerField("id",
+                             help_text="Уникальный идентификатор группы",
+                             blank=True,
+                             null=True)
+
+    name = models.CharField("name",
+                            help_text="Имя группы",
+                            max_length=150,
+                            blank=True,
+                            null=True)
+
+    description = models.CharField("description",
+                                   help_text="Описание группы",
+                                   max_length=150,
+                                   blank=True,
+                                   null=True)
+
+    parentId = models.IntegerField("parentId",
+                                   help_text="id родительской группы (необязательный параметр)",
+                                   blank=True,
+                                   null=True)
+
+    class Meta(object):
+        verbose_name = "автомобиль"
+        verbose_name_plural = "автомобили"
+
+    def __str__(self):
+        return self.reg_number or self.name
