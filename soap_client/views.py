@@ -64,7 +64,8 @@ class RawViewSet(viewsets.ViewSet):
 
     @action(detail=False)
     @swagger_auto_schema(responses={
-        200: GeoZoneSerializer(many=True)
+        200: GeoZoneSerializer(many=True,
+                               help_text="Структура, содержащая данные по геозоне")
     })
     def getAllGeoZones(self, request):
         """
