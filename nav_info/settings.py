@@ -144,8 +144,10 @@ SWAGGER_SETTINGS = {
     'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_yasg.inspectors.SwaggerAutoSchema',
     'VALIDATOR_URL': None,
     'DEEP_LINKING': True,
-    'USE_SESSION_AUTH': False,
+    'USE_SESSION_AUTH': True,
 }
+LOGIN_URL = reverse_lazy('admin:login')
+LOGOUT_URL = reverse_lazy('admin:logout')
 
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -156,6 +158,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
