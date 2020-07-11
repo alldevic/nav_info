@@ -1,8 +1,11 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+import uuid
 
 
 class Device(models.Model):
+    uuid = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False)
     id = models.CharField("id",
                           max_length=150,
                           blank=True,
@@ -66,6 +69,8 @@ class Device(models.Model):
 
 
 class Driver(models.Model):
+    uuid = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False)
     id = models.CharField("id",
                           max_length=150,
                           blank=True,
