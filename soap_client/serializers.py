@@ -100,9 +100,10 @@ class DeviceSerializer(serializers.Serializer):
                                         max_length=250)
 
     groupIds = serializers.ListField(serializers.IntegerField(label="groupId",
-                                                              help_text="ID группы",
-                                                              allow_null=True),
+                                                              help_text="ID группы"),
+
                                      label="groupIds",
+                                     allow_empty=True,
                                      help_text="Список ID групп (клиентов), к которым относится ТС")
 
     class Meta:

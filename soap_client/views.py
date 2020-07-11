@@ -13,19 +13,15 @@ from soap_client.serializers import (
 from zeep.cache import InMemoryCache
 from zeep.transports import Transport
 
+session = Session()
+session.auth = HTTPBasicAuth(settings.NAV_USER, settings.NAV_PASS)
+
+soap_client = zeep.Client(settings.NAV_HOST,
+                          transport=Transport(session=session,
+                                              cache=InMemoryCache()))
+
 
 class RawViewSet(viewsets.ViewSet):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        session = Session()
-        session.auth = HTTPBasicAuth(settings.NAV_USER, settings.NAV_PASS)
-
-        self.client = zeep.Client(settings.NAV_HOST,
-                                  transport=Transport(session=session,
-                                                      cache=InMemoryCache()))
-
     @action(detail=False)
     @swagger_auto_schema(responses={
         200: DeviceSerializer(many=True,
@@ -34,7 +30,8 @@ class RawViewSet(viewsets.ViewSet):
         """
         Метод возвращает список автомобилей компании, к которой принадлежит пользователь, осуществляющий запрос
         """
-        soap_res = self.client.service.getAllDevices()
+
+        soap_res = soap_client.service.getAllDevices()
         serializer = DeviceSerializer(soap_res, many=True)
         return Response(serializer.data)
 
@@ -46,7 +43,8 @@ class RawViewSet(viewsets.ViewSet):
         """
         Метод возвращает список водителей, определенных для компании. Идентификаторы сквозные
         """
-        soap_res = self.client.service.getAllDrivers()
+
+        soap_res = soap_client.service.getAllDrivers()
         serializer = DriverSerializer(soap_res, many=True)
         return Response(serializer.data)
 
@@ -58,7 +56,8 @@ class RawViewSet(viewsets.ViewSet):
         """
         Метод возвращает все группы компании, к которой принадлежит пользователь, осуществляющий запрос
         """
-        soap_res = self.client.service.getAllDeviceGroups()
+
+        soap_res = soap_client.service.getAllDeviceGroups()
         serializer = DeviceGroupSerializer(soap_res, many=True)
         return Response(serializer.data)
 
@@ -71,6 +70,7 @@ class RawViewSet(viewsets.ViewSet):
         """
         Метод возвращает список геозон, определенных для компании. Идентификаторы сквозные
         """
-        soap_res = self.client.service.getAllGeoZones()
+
+        soap_res = soap_client.service.getAllGeoZones()
         serializer = GeoZoneSerializer(soap_res, many=True)
         return Response(serializer.data)
