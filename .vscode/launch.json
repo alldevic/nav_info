@@ -13,8 +13,8 @@
             "showReturnValue": true,
             "pathMappings": [
                 {
-                    "localRoot": "${workspaceFolder}/nav_info",
-                    "remoteRoot": "./nav_info"
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "."
                 }
             ]
         },
