@@ -28,8 +28,8 @@ urlpatterns = [
     path('api/', schema_view.with_ui('swagger',
                                      cache_timeout=0), name='docs-ui'),
     path('api/auth/', include('djoser.urls.authtoken')),
-    # path('api/', include('djoser.urls')),
-    path('api/raw/', include('soap_client.urls')),
+    path('api/', include('djoser.urls')),
+    path('api/', include('soap_client.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:
