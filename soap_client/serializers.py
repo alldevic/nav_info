@@ -1,4 +1,5 @@
 from rest_framework import serializers
+import pytz
 
 
 class DriverSerializer(serializers.Serializer):
@@ -193,3 +194,143 @@ class GeoZoneSerializer(serializers.Serializer):
             "name",
             "points",
         )
+
+
+class RouteControlPointSerializer(serializers.Serializer):
+    """
+    Структура, описывающая контрольные точки маршрута
+    """
+
+    geoZoneId = serializers.IntegerField(label="geoZoneId",
+                                         help_text="Уникальный идентификатор контрольной точки (геозоны) маршрута")
+
+    ffrom = serializers.DateTimeField(label='from',
+                                      source='from',
+                                      help_text="Дата и время планового въезда в контрольной точки",
+                                      format='%Y-%m-%dT%H:%M:%S',
+                                      input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                      default_timezone=pytz.utc)
+
+    to = serializers.DateTimeField(label='to',
+                                   help_text="Дата и время планового выезда из контрольной точки",
+                                   format='%Y-%m-%dT%H:%M:%S',
+                                   input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                   default_timezone=pytz.utc)
+
+    description = serializers.CharField(label="description",
+                                        help_text="Описание контрольной точки маршрута",
+                                        max_length=250)
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['from'] = rep.pop('ffrom')
+        return rep
+
+    class Meta:
+        fields = ("geoZoneId",
+                  'from',
+                  'to',
+                  'description',
+                  )
+
+
+# class RouteCriteriumSerializer(serializers.Serializer):
+
+
+#     class Meta:
+#         fields = (
+#             'routeCriteriumType',
+#             'routeCriteriumValues',
+#             'isStatusEffect'
+#         )
+
+
+class RouteSerializer(serializers.Serializer):
+    """
+    Структура, описывающая набор данных, характеризующих маршрут
+    """
+
+    id = serializers.IntegerField(label="id",
+                                  help_text="Уникальный идентификатор маршрута")
+
+    name = serializers.CharField(label="name",
+                                 max_length=250,
+                                 allow_blank=True,
+                                 help_text="Имя и описание маршрута")
+
+    ffrom = serializers.DateTimeField(label='from',
+                                      source='from',
+                                      help_text="Дата и время начала маршрута",
+                                      format='%Y-%m-%dT%H:%M:%S',
+                                      input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                      default_timezone=pytz.utc)
+
+    to = serializers.DateTimeField(label='to',
+                                   help_text="Дата и время окончания маршрута",
+                                   format='%Y-%m-%dT%H:%M:%S',
+                                   input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                   default_timezone=pytz.utc)
+
+    planBegin = serializers.DateTimeField(label='planBegin',
+                                          help_text="???? Дата и время начала маршрута",
+                                          format='%Y-%m-%dT%H:%M:%S',
+                                          input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                          default_timezone=pytz.utc)
+
+    planEnd = serializers.DateTimeField(label='planEnd',
+                                        help_text="???? Дата и время окончания маршрута",
+                                        format='%Y-%m-%dT%H:%M:%S',
+                                        input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                        default_timezone=pytz.utc)
+
+    deviceId = serializers.IntegerField(label="deviceId",
+                                        help_text='Идентификатор устройства "выполняющего" маршрут')
+
+    driverId = serializers.IntegerField(label="driverId",
+                                        help_text='Идентификатор водителя выполняющего маршрут')
+
+    routeControlPoints = RouteControlPointSerializer(label='routeControlPoints',
+                                                     help_text="Cписок структур контрольных точек маршрута",
+                                                     many=True)
+    # routeCriteriums = RouteCriteriumSerializer(label='routeCriteriums',
+    #                                            help_text="Список структур критериев оценки прохождения маршрута",
+    #                                            many=True)
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['from'] = rep.pop('ffrom')
+        return rep
+
+    class Meta:
+        fields = ("id",
+                  'name',
+                  'from',
+                  'to',
+                  'deviceId',
+                  'driverId',
+                  'routeControlPoints',
+                  #   'routeCriteriums',
+                  )
+
+
+class GetAllRoutestRequestSerializer(serializers.Serializer):
+    ffrom = serializers.DateTimeField(label='from',
+                                      source='from',
+                                      help_text="Дата и время начала маршрута",
+                                      format='%Y-%m-%dT%H:%M:%S',
+                                      input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                      default_timezone=pytz.utc)
+
+    to = serializers.DateTimeField(label='to',
+                                   help_text="Дата и время окончания маршрута",
+                                   format='%Y-%m-%dT%H:%M:%S',
+                                   input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                   default_timezone=pytz.utc)
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['from'] = rep.pop('ffrom')
+        return rep
+
+    class Meta:
+        fields = ('from', 'to')

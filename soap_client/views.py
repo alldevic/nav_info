@@ -8,8 +8,11 @@ from rest_framework.response import Response
 
 import zeep
 from nav_info import settings
+from soap_client.negotiation import IgnoreClientContentNegotiation
 from soap_client.serializers import (
-    DeviceSerializer, DriverSerializer, DeviceGroupSerializer, GeoZoneSerializer)
+    DeviceSerializer, DriverSerializer,
+    DeviceGroupSerializer, GeoZoneSerializer,
+    RouteSerializer, GetAllRoutestRequestSerializer)
 from zeep.cache import InMemoryCache
 from zeep.transports import Transport
 
@@ -22,6 +25,8 @@ soap_client = zeep.Client(settings.NAV_HOST,
 
 
 class RawViewSet(viewsets.ViewSet):
+    content_negotiation_class = IgnoreClientContentNegotiation
+
     @action(detail=False)
     @swagger_auto_schema(responses={
         200: DeviceSerializer(many=True,
@@ -73,4 +78,24 @@ class RawViewSet(viewsets.ViewSet):
 
         soap_res = soap_client.service.getAllGeoZones()
         serializer = GeoZoneSerializer(soap_res, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False)
+    @swagger_auto_schema(
+        query_serializer=GetAllRoutestRequestSerializer,
+        responses={
+            200: RouteSerializer(many=True,
+                                 help_text="Структура, описывающая набор данных, характеризующих маршрут")
+        })
+    def getAllRoutes(self, request):
+        """
+        Метод позволяет получить данные по всем маршрутам, содержащимся в базе данных системы (в соответствии с правами пользователя) за заданный промежуток времени.
+        В ответ метод возвращает множество структур типа Route, описывающих маршруты, начало которых попало в заданный промежуток. Метод возвращает не более 1000 маршрутов.
+        В случае ошибки или, если в заданный промежуток времени не попало ни одного маршрута, метод возвращает пустое значение.
+        Даты в формате YYYY-MM-DDTHH:MM:SS
+        """
+
+        soap_res = soap_client.service.getAllRoutes(
+            request.query_params['ffrom'], request.query_params['to'])
+        serializer = RouteSerializer(soap_res, many=True)
         return Response(serializer.data)
