@@ -142,16 +142,28 @@ SWAGGER_SETTINGS = {
         }
     },
     'DEFAULT_AUTO_SCHEMA_CLASS': 'drf_yasg.inspectors.SwaggerAutoSchema',
-    'USE_SESSION_AUTH': False,
     'VALIDATOR_URL': None,
-
+    'DEEP_LINKING': True,
+    'USE_SESSION_AUTH': False,
 }
 
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
     ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 50
 }
+
+NAV_HOST = get_env('SOAP_WSDL', 'http://test/test?wsdl')
+NAV_USER = get_env('SOAP_USER', 'username')
+NAV_PASS = get_env('SOAP_PASS', 'pass')

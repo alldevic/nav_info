@@ -11,7 +11,6 @@ admin.site.site_header = "Адмнистрирование Nav Info"
 admin.site.site_title = "Адмнистрирование Nav Info"
 admin.site.index_title = "Nav Info"
 
-
 schema_view = get_schema_view(
     openapi.Info(
         title="Nav Info API",
@@ -24,13 +23,13 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', schema_view.with_ui('swagger',
                                      cache_timeout=0), name='docs-ui'),
     path('api/auth/', include('djoser.urls.authtoken')),
-    # path('api/raw/'. include('soap_client.urls')),
+    # path('api/', include('djoser.urls')),
+    path('api/raw/', include('soap_client.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:
