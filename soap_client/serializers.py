@@ -272,13 +272,13 @@ class RouteSerializer(serializers.Serializer):
                                    default_timezone=pytz.utc)
 
     planBegin = serializers.DateTimeField(label='planBegin',
-                                          help_text="???? Дата и время начала маршрута",
+                                          help_text="Плановое время начала маршрута",
                                           format='%Y-%m-%dT%H:%M:%S',
                                           input_formats=['%Y-%m-%dT%H:%M:%S'],
                                           default_timezone=pytz.utc)
 
     planEnd = serializers.DateTimeField(label='planEnd',
-                                        help_text="???? Дата и время окончания маршрута",
+                                        help_text="Плановое время окончания маршрута",
                                         format='%Y-%m-%dT%H:%M:%S',
                                         input_formats=['%Y-%m-%dT%H:%M:%S'],
                                         default_timezone=pytz.utc)
@@ -334,3 +334,99 @@ class GetAllRoutestRequestSerializer(serializers.Serializer):
 
     class Meta:
         fields = ('from', 'to')
+
+
+class GetRouteStatusesRequestSerializer(serializers.Serializer):
+    routeIds = serializers.ListField(label="routeIDs",
+                                     help_text='Cписок идентификаторов маршрутов',
+                                     allow_empty=False,
+                                     child=serializers.IntegerField())
+
+    class Meta:
+        fields = (
+            'routeIds',
+        )
+
+
+class ControlPointStatusSerializer(serializers.Serializer):
+    """
+    Структура, описывающая статус прохождения отдельной контрольной точки (геозоны) маршрута.
+    Примечание: для отображения статусов прохождения контрольных точке используется элементы перечисления RouteStatusValue, аналогично статусам маршрутов в целом
+    """
+
+    controlPointID = serializers.IntegerField(label="controlPointID",
+                                              help_text="Порядковый номер контрольной точки в маршруте")
+
+    controlPointStatusValue = serializers.ChoiceField(label='controlPointStatusValue',
+                                                      choices=[
+                                                          'Executed', 'NotExecuted', 'ExecutedPartially', 'Performed'],
+                                                      help_text='Значение статуса прохождения контрольной точки: выполнен (Executed), не выполнен (NotExecuted), частично выполнен(ExecutedPartially), выполняется(Performed)')
+
+    enterFact = serializers.DateTimeField(label='enterFact',
+                                          help_text="Фактическое время входа в контрольную точку",
+                                          format='%Y-%m-%dT%H:%M:%S',
+                                          input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                          default_timezone=pytz.utc)
+
+    exitFact = serializers.DateTimeField(label='exitFact',
+                                         help_text="Фактическое время выхода из контрольной точки",
+                                         format='%Y-%m-%dT%H:%M:%S',
+                                         input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                         default_timezone=pytz.utc)
+
+    class Meta:
+        fields = (
+            'controlPointId',
+            'controlPointStatusValue',
+            'enterFact',
+            'exitFact',
+        )
+
+
+class RouteStatusSerializer(serializers.Serializer):
+    """
+    Структура, описывающая статус прохождения маршрута.
+    Примечание: для описания значений статуса прохождения маршрута используются элементы перечисления RouteStatusValue
+    Примечание: для описания статусов прохождения отдельных точек маршрута используется структура ControlPointStatus
+    """
+
+    routeId = serializers.IntegerField(label="routeId",
+                                       help_text="Уникальный идентификатор маршрута, для которого приводится описание статуса")
+
+    routeStatusValue = serializers.ChoiceField(label='routeStatusValue',
+                                               choices=[
+                                                   'Executed', 'NotExecuted', 'ExecutedPartially', 'Performed'],
+                                               help_text='Значение статуса прохождения маршрута: выполнен (Executed), не выполнен (NotExecuted), частично выполнен(ExecutedPartially), выполняется(Performed)')
+
+    routePercentage = serializers.IntegerField(label="routePercentage",
+                                               help_text="Процент прохождения маршрута")
+
+    fromFact = serializers.DateTimeField(label='fromFact',
+                                         help_text="Фактическое время начала маршрута",
+                                         format='%Y-%m-%dT%H:%M:%S',
+                                         input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                         default_timezone=pytz.utc)
+
+    toFact = serializers.DateTimeField(label='toFact',
+                                       help_text="фактическое время окончания маршрута",
+                                       format='%Y-%m-%dT%H:%M:%S',
+                                       input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                       default_timezone=pytz.utc)
+
+    mileage = serializers.FloatField(label="mileage",
+                                     help_text="Пробег по маршруту")
+
+    controlPointStatuses = ControlPointStatusSerializer(label='controlPointStatuses',
+                                                        help_text='Статусы прохождения отдельных точек маршрута',
+                                                        many=True)
+
+    class Meta:
+        fields = (
+            'routeId',
+            'routeStatusValue',
+            'routePercentage',
+            'fromFact',
+            'tofact',
+            'mileage',
+            'controlPointStatuses'
+        )

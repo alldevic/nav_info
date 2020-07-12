@@ -9,10 +9,11 @@ from rest_framework.response import Response
 import zeep
 from nav_info import settings
 from soap_client.negotiation import IgnoreClientContentNegotiation
-from soap_client.serializers import (
-    DeviceSerializer, DriverSerializer,
-    DeviceGroupSerializer, GeoZoneSerializer,
-    RouteSerializer, GetAllRoutestRequestSerializer)
+from soap_client.serializers import (DeviceGroupSerializer, DeviceSerializer,
+                                     DriverSerializer, GeoZoneSerializer,
+                                     GetAllRoutestRequestSerializer,
+                                     RouteSerializer, RouteStatusSerializer,
+                                     GetRouteStatusesRequestSerializer)
 from zeep.cache import InMemoryCache
 from zeep.transports import Transport
 
@@ -98,4 +99,22 @@ class RawViewSet(viewsets.ViewSet):
         soap_res = soap_client.service.getAllRoutes(
             request.query_params['ffrom'], request.query_params['to'])
         serializer = RouteSerializer(soap_res, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False)
+    @swagger_auto_schema(
+        query_serializer=GetRouteStatusesRequestSerializer,
+        responses={
+            200: RouteStatusSerializer(many=True,
+                                       help_text="Структура, описывающая статус прохождения маршрута")
+        })
+    def getRouteStatuses(self, request):
+        """
+        Методу передается список идентификаторов маршрутов. В ответ метод возвращает список структур RouteStatus, содержащих статусы прохождения всех запрошенных маршрутов.
+        В случае ошибки метод возвращает пустое значение
+        """
+
+        soap_res = soap_client.service.getRouteStatuses(
+            [int(x) for x in request.query_params['routeIds'].split(',')])
+        serializer = RouteStatusSerializer(soap_res, many=True)
         return Response(serializer.data)
