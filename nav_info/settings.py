@@ -186,3 +186,6 @@ REST_FRAMEWORK = {
 NAV_HOST = get_env('SOAP_WSDL', 'http://test/test?wsdl')
 NAV_USER = get_env('SOAP_USER', 'username')
 NAV_PASS = get_env('SOAP_PASS', 'pass')
+
+# 20 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 20*1024*1024

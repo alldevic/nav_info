@@ -51,7 +51,6 @@ services:
         ipv4_address: 172.20.0.7
       default:
 
-
   redis:
     container_name: nav_redis
     image: redis:6.0-alpine3.12

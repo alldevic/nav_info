@@ -1,7 +1,8 @@
 from django.contrib import admin
-from import_export.admin import ImportExportActionModelAdmin
 
+from import_export.admin import ImportExportActionModelAdmin
 from soap_client.models import NavMtId
+from soap_client.resources import NavMtIdResource
 
 
 class InputFilter(admin.SimpleListFilter):
@@ -44,6 +45,7 @@ class NavIdFilter(InputFilter):
 
 @admin.register(NavMtId)
 class NavMtIdAdmin(ImportExportActionModelAdmin):
+    resource_class = NavMtIdResource
     list_display = ('name', 'mt_id', 'nav_id')
     list_filter = (MtIdFilter,  NavIdFilter)
     search_fields = ('name',)
