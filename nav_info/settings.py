@@ -35,6 +35,7 @@ THIRD_PARTY_APPS = [
     'rest_framework.authtoken',
     'djoser',
     'drf_yasg',
+    'import_export'
 ]
 
 LOCAL_APPS = [
