@@ -1,4 +1,5 @@
 from drf_yasg.utils import swagger_auto_schema
+
 from requests import Session
 from requests.auth import HTTPBasicAuth
 from rest_framework import viewsets
@@ -19,6 +20,7 @@ from soap_client.serializers import (ChannelDescriptorSerializer,
                                      GetPositionRequestSerializer)
 from zeep.cache import InMemoryCache
 from zeep.transports import Transport
+from datetime import datetime, timedelta
 
 session = Session()
 session.auth = HTTPBasicAuth(settings.NAV_USER, settings.NAV_PASS)
@@ -150,24 +152,30 @@ class DataViewSet(viewsets.ViewSet):
     @swagger_auto_schema(
         query_serializer=GetPositionRequestSerializer,
         responses={
-            200: PointSerializer(help_text="Структура, содержащая данные"),
+            200: PointSerializer(help_text="Широта и долгота (координата)"),
             204: 'No Content',
         })
-    def getPosition(self, request):
+    def getDevicePosition(self, request):
         """
-
+        Метод, возвращающий позицию устройства в определенный момент времени
         """
-
+        query_dt = request.query_params['datetime']
+        query_td = int(request.query_params['threshold'])
+        date_from = datetime.strptime(
+            query_dt, '%Y-%m-%dT%H:%M:%S') - timedelta(seconds=query_td)
+        date_to = datetime.strptime(
+            query_dt, '%Y-%m-%dT%H:%M:%S') + timedelta(seconds=query_td)
         soap_res = soap_client.service.getFlatTableSimple(
-            request.query_params['device'],
-            request.query_params['datetime'],
-            request.query_params['datetime'],
-            10,
+            int(request.query_params['device']),
+            date_from.strftime('%Y-%m-%dT%H:%M:%S'),
+            date_to.strftime('%Y-%m-%dT%H:%M:%S'),
+            0,
             [0, ],
             ['Approximate', ]
         )
         try:
-            serializer = PointSerializer(soap_res.rows[0])
+            serializer = PointSerializer(
+                soap_res.rows[0].values[0].pointValue)
             return Response(serializer.data)
         except IndexError:
             return Response(status=204)

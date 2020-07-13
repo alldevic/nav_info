@@ -479,8 +479,13 @@ class GetPositionRequestSerializer(serializers.Serializer):
                                          input_formats=['%Y-%m-%dT%H:%M:%S'],
                                          default_timezone=pytz.utc)
 
+    threshold = serializers.IntegerField(label='threshold',
+                                         help_text='Погрешность в секундах. Значение вычисляется на отрезке [datetime-threshold; datetime+threshold]',
+                                         default=0)
+
     class Meta:
         fields = (
             'device',
-            'datetime'
+            'datetime',
+            'threshold'
         )
