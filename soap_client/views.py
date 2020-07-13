@@ -1,5 +1,8 @@
-from drf_yasg.utils import swagger_auto_schema
+from datetime import datetime, timedelta
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from drf_yasg.utils import swagger_auto_schema
 from requests import Session
 from requests.auth import HTTPBasicAuth
 from rest_framework import viewsets
@@ -13,14 +16,13 @@ from soap_client.serializers import (ChannelDescriptorSerializer,
                                      DeviceGroupSerializer, DeviceSerializer,
                                      DriverSerializer, GeoZoneSerializer,
                                      GetAllRoutestRequestSerializer,
-                                     GetRouteStatusesRequestSerializer,
-                                     RouteSerializer, RouteStatusSerializer,
                                      GetChannelDescriptorsRequestSerializer,
-                                     PointSerializer,
-                                     GetPositionRequestSerializer)
+                                     GetPositionRequestSerializer,
+                                     GetRouteStatusesRequestSerializer,
+                                     PointSerializer, RouteSerializer,
+                                     RouteStatusSerializer)
 from zeep.cache import InMemoryCache
 from zeep.transports import Transport
-from datetime import datetime, timedelta
 
 session = Session()
 session.auth = HTTPBasicAuth(settings.NAV_USER, settings.NAV_PASS)
@@ -36,7 +38,9 @@ class RawViewSet(viewsets.ViewSet):
     @action(detail=False)
     @swagger_auto_schema(responses={
         200: DeviceSerializer(many=True,
-                              help_text="Структура, содержащая данные по автомобилю")})
+                              help_text="Структура, содержащая данные по автомобилю")
+    })
+    @method_decorator(cache_page(settings.CACHE_LONG_TTL))
     def getAllDevices(self, request):
         """
         Метод возвращает список автомобилей компании, к которой принадлежит пользователь, осуществляющий запрос
@@ -49,7 +53,9 @@ class RawViewSet(viewsets.ViewSet):
     @action(detail=False)
     @swagger_auto_schema(responses={
         200: DriverSerializer(many=True,
-                              help_text="Структура, содержащая данные по водителю")})
+                              help_text="Структура, содержащая данные по водителю")
+    })
+    @method_decorator(cache_page(settings.CACHE_LONG_TTL))
     def getAllDrivers(self, request):
         """
         Метод возвращает список водителей, определенных для компании. Идентификаторы сквозные
@@ -62,7 +68,9 @@ class RawViewSet(viewsets.ViewSet):
     @action(detail=False)
     @swagger_auto_schema(responses={
         200: DeviceGroupSerializer(many=True,
-                                   help_text="Структура содержит данные по группе (клиенту)")})
+                                   help_text="Структура содержит данные по группе (клиенту)")
+    })
+    @method_decorator(cache_page(settings.CACHE_LONG_TTL))
     def getAllDeviceGroups(self, request):
         """
         Метод возвращает все группы компании, к которой принадлежит пользователь, осуществляющий запрос
@@ -77,6 +85,7 @@ class RawViewSet(viewsets.ViewSet):
         200: GeoZoneSerializer(many=True,
                                help_text="Структура, содержащая данные по геозоне")
     })
+    @method_decorator(cache_page(settings.CACHE_LONG_TTL))
     def getAllGeoZones(self, request):
         """
         Метод возвращает список геозон, определенных для компании. Идентификаторы сквозные
@@ -131,6 +140,7 @@ class RawViewSet(viewsets.ViewSet):
             200: ChannelDescriptorSerializer(many=True,
                                              help_text="Структура, содержащая данные по каналу")
         })
+    @method_decorator(cache_page(settings.CACHE_LONG_TTL))
     def getChannelDescriptors(self, request):
         """
         Метод возвращает список доступных каналов для запроса по данному устройству.

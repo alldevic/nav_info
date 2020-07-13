@@ -13,6 +13,8 @@ djoser = "==2.0.3"
 lxml = "==4.5.1"
 zeep = "==3.4.0"
 django-import-export = "==2.3.0"
+django-redis = "==4.12.1"
+hiredis = "==1.0.1"
 
 [dev-packages]
 flake8 = "*"

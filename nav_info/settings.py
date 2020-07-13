@@ -60,6 +60,7 @@ if DEBUG:
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
+    'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -102,6 +103,20 @@ DATABASES = {
         'PORT': 5432
     }
 }
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://172.20.0.8:6379/1",
+        "OPTIONS": {
+            "PARSER_CLASS": "redis.connection.HiredisParser",
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+CACHE_LONG_TTL = int(get_env('CACHE_LONG_TTL', '7200'))
+CACHE_SHORT_TTL = int(get_env('CACHE_SHORT_TTL', '120'))
 
 AUTH_USER_MODEL = 'user_profile.UserProfile'
 
