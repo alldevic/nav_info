@@ -40,6 +40,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     'user_profile.apps.UserProfileConfig',
     'soap_client',
+    'complex_data',
 ]
 
 if DEBUG:

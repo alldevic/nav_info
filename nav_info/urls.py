@@ -2,7 +2,6 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.views.generic import RedirectView
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -36,6 +35,7 @@ urlpatterns = [
     path(f'{prefix}auth/', include('djoser.urls.authtoken')),
     path(prefix, include('djoser.urls')),
     path(prefix, include('soap_client.urls')),
+    path(prefix, include('complex_data.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:
