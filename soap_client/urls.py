@@ -5,6 +5,7 @@ from soap_client import views
 
 router = DefaultRouter()
 router.register('raw', views.RawViewSet, basename='raw')
+router.register('data', views.DataViewSet, basename='data')
 
 
 urlpatterns = [

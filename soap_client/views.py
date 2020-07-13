@@ -14,7 +14,9 @@ from soap_client.serializers import (ChannelDescriptorSerializer,
                                      GetAllRoutestRequestSerializer,
                                      GetRouteStatusesRequestSerializer,
                                      RouteSerializer, RouteStatusSerializer,
-                                     GetChannelDescriptorsRequestSerializer)
+                                     GetChannelDescriptorsRequestSerializer,
+                                     PointSerializer,
+                                     GetPositionRequestSerializer)
 from zeep.cache import InMemoryCache
 from zeep.transports import Transport
 
@@ -139,3 +141,33 @@ class RawViewSet(viewsets.ViewSet):
         )
         serializer = ChannelDescriptorSerializer(soap_res, many=True)
         return Response(serializer.data)
+
+
+class DataViewSet(viewsets.ViewSet):
+    content_negotiation_class = IgnoreClientContentNegotiation
+
+    @action(detail=False)
+    @swagger_auto_schema(
+        query_serializer=GetPositionRequestSerializer,
+        responses={
+            200: PointSerializer(help_text="Структура, содержащая данные"),
+            204: 'No Content',
+        })
+    def getPosition(self, request):
+        """
+
+        """
+
+        soap_res = soap_client.service.getFlatTableSimple(
+            request.query_params['device'],
+            request.query_params['datetime'],
+            request.query_params['datetime'],
+            10,
+            [0, ],
+            ['Approximate', ]
+        )
+        try:
+            serializer = PointSerializer(soap_res.rows[0])
+            return Response(serializer.data)
+        except IndexError:
+            return Response(status=204)

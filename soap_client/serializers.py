@@ -467,3 +467,20 @@ class ChannelDescriptorSerializer(serializers.Serializer):
             'name',
             'type',
         )
+
+
+class GetPositionRequestSerializer(serializers.Serializer):
+    device = serializers.IntegerField(label="device",
+                                      help_text="Идентификатор транспортного средства")
+
+    datetime = serializers.DateTimeField(label='datetime',
+                                         help_text="Дата в формате YYYY-MM-DDTHH:MM:SS",
+                                         format='%Y-%m-%dT%H:%M:%S',
+                                         input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                         default_timezone=pytz.utc)
+
+    class Meta:
+        fields = (
+            'device',
+            'datetime'
+        )
