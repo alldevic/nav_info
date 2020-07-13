@@ -430,3 +430,40 @@ class RouteStatusSerializer(serializers.Serializer):
             'mileage',
             'controlPointStatuses'
         )
+
+
+class GetChannelDescriptorsRequestSerializer(serializers.Serializer):
+    device = serializers.IntegerField(label="device",
+                                      help_text='Идентификатор автомобиля',
+                                      )
+
+    class Meta:
+        fields = (
+            'device',
+        )
+
+
+class ChannelDescriptorSerializer(serializers.Serializer):
+    """
+    Структура, содержащая данные по каналу
+    """
+
+    id = serializers.IntegerField(label="id",
+                                  help_text="Идентификатор канала")
+
+    name = serializers.CharField(label="name",
+                                 max_length=250,
+                                 allow_blank=True,
+                                 help_text="Имя канала")
+
+    type = serializers.ChoiceField(label='type',
+                                   choices=[
+                                       'Float', 'Boolean', 'Long', 'Datetime', 'String', 'Point', 'LongSeq'],
+                                   help_text='Типы значений каналов')
+
+    class Meta:
+        fields = (
+            'id',
+            'name',
+            'type',
+        )

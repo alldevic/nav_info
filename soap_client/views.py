@@ -8,11 +8,13 @@ from rest_framework.response import Response
 import zeep
 from nav_info import settings
 from soap_client.negotiation import IgnoreClientContentNegotiation
-from soap_client.serializers import (DeviceGroupSerializer, DeviceSerializer,
+from soap_client.serializers import (ChannelDescriptorSerializer,
+                                     DeviceGroupSerializer, DeviceSerializer,
                                      DriverSerializer, GeoZoneSerializer,
                                      GetAllRoutestRequestSerializer,
+                                     GetRouteStatusesRequestSerializer,
                                      RouteSerializer, RouteStatusSerializer,
-                                     GetRouteStatusesRequestSerializer)
+                                     GetChannelDescriptorsRequestSerializer)
 from zeep.cache import InMemoryCache
 from zeep.transports import Transport
 
@@ -116,4 +118,24 @@ class RawViewSet(viewsets.ViewSet):
         soap_res = soap_client.service.getRouteStatuses(
             [int(x) for x in request.query_params['routeIds'].split(',')])
         serializer = RouteStatusSerializer(soap_res, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False)
+    @swagger_auto_schema(
+        query_serializer=GetChannelDescriptorsRequestSerializer,
+        responses={
+            200: ChannelDescriptorSerializer(many=True,
+                                             help_text="Структура, содержащая данные по каналу")
+        })
+    def getChannelDescriptors(self, request):
+        """
+        Метод возвращает список доступных каналов для запроса по данному устройству.
+        Идентификаторы сквозные (один и тот же канал возвращается для разных устройств,
+        если его запрос по этому устройству возможен)
+        """
+
+        soap_res = soap_client.service.getChannelDescriptors(
+            request.query_params['device']
+        )
+        serializer = ChannelDescriptorSerializer(soap_res, many=True)
         return Response(serializer.data)
