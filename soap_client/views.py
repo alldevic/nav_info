@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from drf_yasg.utils import swagger_auto_schema
 from requests import Session
 from requests.auth import HTTPBasicAuth
