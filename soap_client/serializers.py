@@ -489,3 +489,63 @@ class GetPositionRequestSerializer(serializers.Serializer):
             'datetime',
             'threshold'
         )
+
+
+class GetCurrentRoutesRequestSerializer(serializers.Serializer):
+    time_in = serializers.DateTimeField(label='time_in',
+                                        help_text="Дата и время начала маршрута",
+                                        format='%Y-%m-%dT%H:%M:%S',
+                                        input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                        default_timezone=pytz.utc)
+
+    time_out = serializers.DateTimeField(label='time_out',
+                                         help_text="Дата и время окончания маршрута",
+                                         format='%Y-%m-%dT%H:%M:%S',
+                                         input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                         default_timezone=pytz.utc)
+
+    class Meta:
+        fields = (
+            'time_in',
+            'time_out'
+        )
+
+
+class MtGeoZoneSerializer(serializers.Serializer):
+    description = serializers.CharField(label="description",
+                                        help_text="Описание площадки",
+                                        max_length=250)
+
+    nav_id = serializers.IntegerField(label="nav_id",
+                                      help_text="Идентификатор канала")
+
+    mt_id = serializers.IntegerField(label="mt_id",
+                                     help_text="Идентификатор водителя")
+
+    class Meta:
+        fields = (
+            'description',
+            'nav_id',
+            'mt_id',
+        )
+
+
+class CurrentRoutesSerializer(serializers.Serializer):
+    id = serializers.IntegerField(label="id",
+                                  help_text="Идентификатор маршрута")
+    device = serializers.IntegerField(label="device",
+                                      help_text="Идентификатор канала")
+
+    mtIds = serializers.ListField(MtGeoZoneSerializer(label="mtId",
+                                                      help_text="МТ ID площадки"),
+
+                                  label="mtIds",
+                                  allow_empty=True,
+                                  help_text="Список МТ ID площадок")
+
+    class Meta:
+        fields = (
+            'id',
+            'device',
+            'mtIds',
+        )

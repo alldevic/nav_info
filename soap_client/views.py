@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+import zeep
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from drf_yasg.utils import swagger_auto_schema
@@ -8,21 +9,24 @@ from requests.auth import HTTPBasicAuth
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
-import zeep
+from zeep.cache import InMemoryCache
+from zeep.transports import Transport
+from zeep.helpers import serialize_object
 from nav_info import settings
+from soap_client.models import NavMtId
 from soap_client.negotiation import IgnoreClientContentNegotiation
 from soap_client.serializers import (ChannelDescriptorSerializer,
+                                     CurrentRoutesSerializer,
                                      DeviceGroupSerializer, DeviceSerializer,
                                      DriverSerializer, GeoZoneSerializer,
                                      GetAllRoutestRequestSerializer,
                                      GetChannelDescriptorsRequestSerializer,
+                                     GetCurrentRoutesRequestSerializer,
                                      GetPositionRequestSerializer,
                                      GetRouteStatusesRequestSerializer,
                                      PointSerializer, RouteSerializer,
                                      RouteStatusSerializer)
-from zeep.cache import InMemoryCache
-from zeep.transports import Transport
+import json
 
 session = Session()
 session.auth = HTTPBasicAuth(settings.NAV_USER, settings.NAV_PASS)
@@ -30,6 +34,8 @@ session.auth = HTTPBasicAuth(settings.NAV_USER, settings.NAV_PASS)
 soap_client = zeep.Client(settings.NAV_HOST,
                           transport=Transport(session=session,
                                               cache=InMemoryCache()))
+
+navmtids = [x for x in NavMtId.objects.all()]
 
 
 class RawViewSet(viewsets.ViewSet):
@@ -189,3 +195,49 @@ class DataViewSet(viewsets.ViewSet):
             return Response(serializer.data)
         except IndexError:
             return Response(status=204)
+
+    @action(detail=False)
+    @swagger_auto_schema(
+        query_serializer=GetCurrentRoutesRequestSerializer,
+        responses={
+            200: CurrentRoutesSerializer(help_text="Текущий марщрут", many=True),
+        })
+    def getCurrentRoutes(self, request):
+        """
+        Cегодняшний маршруты, которые необходимо пройти 
+        """
+        time_in = request.query_params['time_in']
+        time_out = request.query_params['time_out']
+
+        all_routes = soap_client.service.getAllRoutes(time_in, time_out)
+        all_routes = serialize_object(all_routes)
+        res = []
+        for route in all_routes:
+            res_route = {}
+            res_route['id'] = int(route['id'])
+            res_route['device'] = int(route['deviceId'])
+            mt_ids = []
+            for geozone in route['routeControlPoints']:
+                geozone_res = {}
+                geozone_res["description"] = geozone['description']
+                geozone_res['nav_id'] = int(geozone['geoZoneId'])
+                try:
+                    geozone_res['mt_id'] = [
+                        x for x in navmtids if x.nav_id is geozone_res['nav_id']][0]
+                except:
+                    geozone_res['mt_id'] = -1
+
+                mt_ids.append(geozone_res)
+            res_route['mtIds'] = mt_ids
+            res.append(res_route)
+
+        serializer = CurrentRoutesSerializer(res, many=True)
+        return Response(serializer.data)
+
+    def getRouteUnloads(self, request):
+        route_id = int(request.query['route_id'])
+        soap_res = soap_client.service.getRouteStatuses(
+            [route_id])
+
+        serializer = RouteStatusSerializer(soap_res, many=True)
+        return Response(serializer.data)
