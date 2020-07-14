@@ -521,11 +521,19 @@ class MtGeoZoneSerializer(serializers.Serializer):
 
     mt_id = serializers.IntegerField(label="mt_id",
                                      help_text="Идентификатор водителя")
+    in_time = serializers.CharField(label="in_time",
+                                    help_text="Время входа",
+                                    max_length=250)
+    out_time = serializers.CharField(label="out_time",
+                                     help_text="Время выхода",
+                                     max_length=250)
 
     class Meta:
         fields = (
             'description',
             'nav_id',
+            'in_time',
+            'out_time',
             'mt_id',
         )
 
@@ -535,7 +543,6 @@ class CurrentRoutesSerializer(serializers.Serializer):
                                   help_text="Идентификатор маршрута")
     device = serializers.IntegerField(label="device",
                                       help_text="Идентификатор канала")
-
     mtIds = serializers.ListField(MtGeoZoneSerializer(label="mtId",
                                                       help_text="МТ ID площадки"),
 
@@ -548,4 +555,36 @@ class CurrentRoutesSerializer(serializers.Serializer):
             'id',
             'device',
             'mtIds',
+        )
+
+
+class GetRouteUnloadsRequestSerializer(serializers.Serializer):
+    id = serializers.IntegerField(label="id",
+                                  help_text="Идентификатор маршрута")
+
+    time_in = serializers.DateTimeField(label='time_in',
+                                        help_text="Дата и время начала маршрута",
+                                        format='%Y-%m-%dT%H:%M:%S',
+                                        input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                        default_timezone=pytz.utc)
+
+    time_out = serializers.DateTimeField(label='time_out',
+                                         help_text="Дата и время окончания маршрута",
+                                         format='%Y-%m-%dT%H:%M:%S',
+                                         input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                         default_timezone=pytz.utc)
+
+    class Meta:
+        fields = (
+            'id',
+            'time_in',
+            'time_out'
+        )
+
+
+class RouteUnloadsSerializer(serializers.Serializer):
+
+    class Meta:
+        fields = (
+
         )

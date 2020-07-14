@@ -25,7 +25,9 @@ from soap_client.serializers import (ChannelDescriptorSerializer,
                                      GetPositionRequestSerializer,
                                      GetRouteStatusesRequestSerializer,
                                      PointSerializer, RouteSerializer,
-                                     RouteStatusSerializer)
+                                     RouteStatusSerializer,
+                                     GetRouteUnloadsRequestSerializer,
+                                     RouteUnloadsSerializer)
 import json
 
 session = Session()
@@ -220,6 +222,8 @@ class DataViewSet(viewsets.ViewSet):
             for geozone in route['routeControlPoints']:
                 geozone_res = {}
                 geozone_res["description"] = geozone['description']
+                geozone_res["in_time"] = geozone['from']
+                geozone_res["out_time"] = geozone['to']
                 geozone_res['nav_id'] = int(geozone['geoZoneId'])
                 try:
                     geozone_res['mt_id'] = [
@@ -235,15 +239,31 @@ class DataViewSet(viewsets.ViewSet):
         serializer = CurrentRoutesSerializer(res, many=True)
         return Response(serializer.data)
 
+    @action(detail=False)
+    @swagger_auto_schema(
+        query_serializer=GetRouteUnloadsRequestSerializer,
+        responses={
+            200: RouteUnloadsSerializer(help_text="Текущий марщрут", many=True),
+        })
     def getRouteUnloads(self, request):
-        route_id = int(request.query['route_id'])
+        # 20278916
+        route_id = int(request.query_params['id'])
+        time_in = request.query_params['time_in']
+        time_out = request.query_params['time_out']
+
         soap_res = serialize_object(
             soap_client.service.getRouteStatuses([route_id]))
 
+        all_routes = soap_client.service.getAllRoutes(time_in, time_out)
+        route = [x['id'] for x in serialize_object(
+            all_routes) if x['id'] == route_id]
+
+        res = {}
         for status in soap_res['controlPointStatuses']:
             tmp = {}
             tmp['state'] = status['controlPointStatusValue']
             tmp['nav_id'] = status['controlPointStatusValue']
+            res.append(tmp)
 
-        serializer = RouteStatusSerializer(soap_res, many=True)
+        serializer = RouteUnloadsSerializer(res, many=True)
         return Response(serializer.data)
