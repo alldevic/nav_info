@@ -223,7 +223,8 @@ class DataViewSet(viewsets.ViewSet):
                 geozone_res['nav_id'] = int(geozone['geoZoneId'])
                 try:
                     geozone_res['mt_id'] = [
-                        x for x in navmtids if x.nav_id is geozone_res['nav_id']][0]
+                        x for x in navmtids if x.nav_id == geozone_res['nav_id']]
+                    geozone_res['mt_id'] = geozone_res['mt_id'][0].mt_id
                 except:
                     geozone_res['mt_id'] = -1
 
@@ -236,8 +237,13 @@ class DataViewSet(viewsets.ViewSet):
 
     def getRouteUnloads(self, request):
         route_id = int(request.query['route_id'])
-        soap_res = soap_client.service.getRouteStatuses(
-            [route_id])
+        soap_res = serialize_object(
+            soap_client.service.getRouteStatuses([route_id]))
+
+        for status in soap_res['controlPointStatuses']:
+            tmp = {}
+            tmp['state'] = status['controlPointStatusValue']
+            tmp['nav_id'] = status['controlPointStatusValue']
 
         serializer = RouteStatusSerializer(soap_res, many=True)
         return Response(serializer.data)
