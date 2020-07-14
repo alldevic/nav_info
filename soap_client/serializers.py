@@ -543,8 +543,8 @@ class CurrentRoutesSerializer(serializers.Serializer):
                                   help_text="Идентификатор маршрута")
     device = serializers.IntegerField(label="device",
                                       help_text="Идентификатор канала")
-    mtIds = serializers.ListField(MtGeoZoneSerializer(label="mtId",
-                                                      help_text="МТ ID площадки"),
+    mtIds = serializers.ListField(child=MtGeoZoneSerializer(label="mtId",
+                                                            help_text="МТ ID площадки"),
 
                                   label="mtIds",
                                   allow_empty=True,
@@ -559,8 +559,10 @@ class CurrentRoutesSerializer(serializers.Serializer):
 
 
 class GetRouteUnloadsRequestSerializer(serializers.Serializer):
-    id = serializers.IntegerField(label="id",
-                                  help_text="Идентификатор маршрута")
+    ids = serializers.ListField(child=serializers.IntegerField(label="id",
+                                                               help_text="Идентификатор маршрута"),
+                                help_text="Идентификаторы маршрутов",
+                                label='ids')
 
     time_in = serializers.DateTimeField(label='time_in',
                                         help_text="Дата и время начала маршрута",
@@ -576,7 +578,7 @@ class GetRouteUnloadsRequestSerializer(serializers.Serializer):
 
     class Meta:
         fields = (
-            'id',
+            'ids',
             'time_in',
             'time_out'
         )
@@ -610,4 +612,19 @@ class RouteUnloadsSerializer(serializers.Serializer):
             'out_time',
             'mt_id',
             'state',
+        )
+
+
+class RouteUnloadsSerializerQwe(serializers.Serializer):
+    id = serializers.IntegerField(label="id",
+                                  help_text="Идентификатор маршрута")
+    unloaded_platforms = serializers.ListField(label='unloaded_platforms',
+                                               help_text="Состояния площадок",
+                                               child=RouteUnloadsSerializer(label='unloaded_platform',
+                                                                            help_text='Отгруженная площадка'))
+
+    class Meta:
+        fields = (
+            'id',
+            'unloaded_platforms',
         )

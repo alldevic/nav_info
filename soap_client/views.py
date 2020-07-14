@@ -27,7 +27,8 @@ from soap_client.serializers import (ChannelDescriptorSerializer,
                                      PointSerializer, RouteSerializer,
                                      RouteStatusSerializer,
                                      GetRouteUnloadsRequestSerializer,
-                                     RouteUnloadsSerializer)
+                                     RouteUnloadsSerializer,
+                                     RouteUnloadsSerializerQwe)
 import json
 
 session = Session()
@@ -243,38 +244,46 @@ class DataViewSet(viewsets.ViewSet):
     @swagger_auto_schema(
         query_serializer=GetRouteUnloadsRequestSerializer,
         responses={
-            200: RouteUnloadsSerializer(help_text="Текущий марщрут", many=True),
+            200: RouteUnloadsSerializerQwe(help_text="Текущий марщрут", many=True),
         })
     def getRouteUnloads(self, request):
         # 20278916
-        route_id = int(request.query_params['id'])
+        route_ids = [int(x) for x in request.query_params['ids'].split(',')]
         time_in = request.query_params['time_in']
         time_out = request.query_params['time_out']
 
         soap_res = serialize_object(
-            soap_client.service.getRouteStatuses([route_id]))
+            soap_client.service.getRouteStatuses(route_ids))
 
         all_routes = soap_client.service.getAllRoutes(time_in, time_out)
-        route = [x for x in serialize_object(
-            all_routes) if x['id'] == route_id][0]
 
         res = []
-        for status in soap_res[0]['controlPointStatuses']:
-            tmp = {}
-            tmp['state'] = status['controlPointStatusValue']
-            geozone = route['routeControlPoints'][int(
-                status['controlPointID'])]
-            tmp['nav_id'] = geozone['geoZoneId']
-            try:
-                tmp['mt_id'] = [
-                    x for x in navmtids if x.nav_id == tmp['nav_id']]
-                tmp['mt_id'] = tmp['mt_id'][0].mt_id
-            except:
-                tmp['mt_id'] = -1
-            tmp["in_time"] = geozone['from']
-            tmp["out_time"] = geozone['to']
-            tmp["description"] = geozone["description"]
-            res.append(tmp)
+        i = 0
+        for route_id in route_ids:
+            rt_res = {}
+            rt_res['id'] = route_id
+            qwe = []
+            route = [x for x in serialize_object(
+                all_routes) if x['id'] == route_id][0]
+            for status in soap_res[i]['controlPointStatuses']:
+                tmp = {}
+                tmp['state'] = status['controlPointStatusValue']
+                geozone = route['routeControlPoints'][int(
+                    status['controlPointID'])]
+                tmp['nav_id'] = geozone['geoZoneId']
+                try:
+                    tmp['mt_id'] = [
+                        x for x in navmtids if x.nav_id == tmp['nav_id']]
+                    tmp['mt_id'] = tmp['mt_id'][0].mt_id
+                except:
+                    tmp['mt_id'] = -1
+                tmp["in_time"] = geozone['from']
+                tmp["out_time"] = geozone['to']
+                tmp["description"] = geozone["description"]
+                qwe.append(tmp)
+            rt_res['unloaded_platforms'] = qwe
+            i += 1
+            res.append(rt_res)
 
-        serializer = RouteUnloadsSerializer(res, many=True)
+        serializer = RouteUnloadsSerializerQwe(res, many=True)
         return Response(serializer.data)
