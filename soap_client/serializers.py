@@ -583,8 +583,31 @@ class GetRouteUnloadsRequestSerializer(serializers.Serializer):
 
 
 class RouteUnloadsSerializer(serializers.Serializer):
+    description = serializers.CharField(label="description",
+                                        help_text="Описание площадки",
+                                        max_length=250)
+
+    nav_id = serializers.IntegerField(label="nav_id",
+                                      help_text="Идентификатор канала")
+
+    mt_id = serializers.IntegerField(label="mt_id",
+                                     help_text="Идентификатор водителя")
+    in_time = serializers.CharField(label="in_time",
+                                    help_text="Время входа",
+                                    max_length=250)
+    out_time = serializers.CharField(label="out_time",
+                                     help_text="Время выхода",
+                                     max_length=250)
+    state = serializers.CharField(label="state",
+                                  help_text="Статус",
+                                  max_length=250)
 
     class Meta:
         fields = (
-
+            'description',
+            'nav_id',
+            'in_time',
+            'out_time',
+            'mt_id',
+            'state',
         )
