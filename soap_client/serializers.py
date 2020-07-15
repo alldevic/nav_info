@@ -430,3 +430,201 @@ class RouteStatusSerializer(serializers.Serializer):
             'mileage',
             'controlPointStatuses'
         )
+
+
+class GetChannelDescriptorsRequestSerializer(serializers.Serializer):
+    device = serializers.IntegerField(label="device",
+                                      help_text='Идентификатор автомобиля',
+                                      )
+
+    class Meta:
+        fields = (
+            'device',
+        )
+
+
+class ChannelDescriptorSerializer(serializers.Serializer):
+    """
+    Структура, содержащая данные по каналу
+    """
+
+    id = serializers.IntegerField(label="id",
+                                  help_text="Идентификатор канала")
+
+    name = serializers.CharField(label="name",
+                                 max_length=250,
+                                 allow_blank=True,
+                                 help_text="Имя канала")
+
+    type = serializers.ChoiceField(label='type',
+                                   choices=[
+                                       'Float', 'Boolean', 'Long', 'Datetime', 'String', 'Point', 'LongSeq'],
+                                   help_text='Типы значений каналов')
+
+    class Meta:
+        fields = (
+            'id',
+            'name',
+            'type',
+        )
+
+
+class GetPositionRequestSerializer(serializers.Serializer):
+    device = serializers.IntegerField(label="device",
+                                      help_text="Идентификатор транспортного средства")
+
+    datetime = serializers.DateTimeField(label='datetime',
+                                         help_text="Дата в формате YYYY-MM-DDTHH:MM:SS",
+                                         format='%Y-%m-%dT%H:%M:%S',
+                                         input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                         default_timezone=pytz.utc)
+
+    threshold = serializers.IntegerField(label='threshold',
+                                         help_text='Погрешность в секундах. Значение вычисляется на отрезке [datetime-threshold; datetime+threshold]',
+                                         default=0)
+
+    class Meta:
+        fields = (
+            'device',
+            'datetime',
+            'threshold'
+        )
+
+
+class GetCurrentRoutesRequestSerializer(serializers.Serializer):
+    time_in = serializers.DateTimeField(label='time_in',
+                                        help_text="Дата и время начала маршрута",
+                                        format='%Y-%m-%dT%H:%M:%S',
+                                        input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                        default_timezone=pytz.utc)
+
+    time_out = serializers.DateTimeField(label='time_out',
+                                         help_text="Дата и время окончания маршрута",
+                                         format='%Y-%m-%dT%H:%M:%S',
+                                         input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                         default_timezone=pytz.utc)
+
+    class Meta:
+        fields = (
+            'time_in',
+            'time_out'
+        )
+
+
+class MtGeoZoneSerializer(serializers.Serializer):
+    description = serializers.CharField(label="description",
+                                        help_text="Описание площадки",
+                                        max_length=250)
+
+    nav_id = serializers.IntegerField(label="nav_id",
+                                      help_text="Идентификатор канала")
+
+    mt_id = serializers.IntegerField(label="mt_id",
+                                     help_text="Идентификатор водителя")
+    in_time = serializers.CharField(label="in_time",
+                                    help_text="Время входа",
+                                    max_length=250)
+    out_time = serializers.CharField(label="out_time",
+                                     help_text="Время выхода",
+                                     max_length=250)
+
+    class Meta:
+        fields = (
+            'description',
+            'nav_id',
+            'in_time',
+            'out_time',
+            'mt_id',
+        )
+
+
+class CurrentRoutesSerializer(serializers.Serializer):
+    id = serializers.IntegerField(label="id",
+                                  help_text="Идентификатор маршрута")
+    device = serializers.IntegerField(label="device",
+                                      help_text="Идентификатор канала")
+    mtIds = serializers.ListField(child=MtGeoZoneSerializer(label="mtId",
+                                                            help_text="МТ ID площадки"),
+
+                                  label="mtIds",
+                                  allow_empty=True,
+                                  help_text="Список МТ ID площадок")
+
+    class Meta:
+        fields = (
+            'id',
+            'device',
+            'mtIds',
+        )
+
+
+class GetRouteUnloadsRequestSerializer(serializers.Serializer):
+    ids = serializers.ListField(child=serializers.IntegerField(label="id",
+                                                               help_text="Идентификатор маршрута"),
+                                help_text="Идентификаторы маршрутов",
+                                label='ids')
+
+    time_in = serializers.DateTimeField(label='time_in',
+                                        help_text="Дата и время начала маршрута",
+                                        format='%Y-%m-%dT%H:%M:%S',
+                                        input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                        default_timezone=pytz.utc)
+
+    time_out = serializers.DateTimeField(label='time_out',
+                                         help_text="Дата и время окончания маршрута",
+                                         format='%Y-%m-%dT%H:%M:%S',
+                                         input_formats=['%Y-%m-%dT%H:%M:%S'],
+                                         default_timezone=pytz.utc)
+
+    class Meta:
+        fields = (
+            'ids',
+            'time_in',
+            'time_out'
+        )
+
+
+class RouteUnloadsSerializer(serializers.Serializer):
+    description = serializers.CharField(label="description",
+                                        help_text="Описание площадки",
+                                        max_length=250)
+
+    nav_id = serializers.IntegerField(label="nav_id",
+                                      help_text="Идентификатор канала")
+
+    mt_id = serializers.IntegerField(label="mt_id",
+                                     help_text="Идентификатор водителя")
+    in_time = serializers.CharField(label="in_time",
+                                    help_text="Время входа",
+                                    max_length=250)
+    out_time = serializers.CharField(label="out_time",
+                                     help_text="Время выхода",
+                                     max_length=250)
+    state = serializers.CharField(label="state",
+                                  help_text="Статус",
+                                  max_length=250)
+
+    class Meta:
+        fields = (
+            'description',
+            'nav_id',
+            'in_time',
+            'out_time',
+            'mt_id',
+            'state',
+        )
+
+
+class RouteUnloadsSerializerQwe(serializers.Serializer):
+    id = serializers.IntegerField(label="id",
+                                  help_text="Идентификатор маршрута")
+    unloaded_platforms = serializers.ListField(label='unloaded_platforms',
+                                               help_text="Состояния площадок",
+                                               child=RouteUnloadsSerializer(label='unloaded_platform',
+                                                                            help_text='Отгруженная площадка'))
+
+    class Meta:
+        fields = (
+            'id',
+            'unloaded_platforms',
+        )
