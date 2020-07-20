@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: nav-stage
     steps:
       - uses: actions/checkout@v2
       - name: Create .env
