@@ -33,7 +33,7 @@ urlpatterns = [
     path(prefix, schema_view.with_ui('swagger',
                                      cache_timeout=0), name='docs-ui'),
     path(f'{prefix}auth/', include('djoser.urls.authtoken')),
-    path(prefix, include('djoser.urls')),
+    # path(prefix, include('djoser.urls')),
     path(prefix, include('soap_client.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
