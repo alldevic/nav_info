@@ -254,22 +254,22 @@ class DataViewSet(viewsets.ViewSet):
 
         soap_res = serialize_object(
             soap_client.service.getRouteStatuses(route_ids))
-
+        # import time
+        # time.sleep(1)
         all_routes = soap_client.service.getAllRoutes(time_in, time_out)
 
         res = []
-        i = 0
         for route_id in route_ids:
-            rt_res = {}
-            rt_res['id'] = route_id
-            qwe = []
             try:
                 route = [x for x in serialize_object(
                     all_routes) if x['id'] == route_id][0]
+                statuses = [x['controlPointStatuses']
+                            for x in soap_res if x['routeId'] == route_id][0]
             except:
                 continue
 
-            for status in soap_res[i]['controlPointStatuses']:
+            qwe = []
+            for status in statuses:
                 tmp = {}
                 tmp['state'] = status['controlPointStatusValue']
                 geozone = route['routeControlPoints'][int(
@@ -285,9 +285,12 @@ class DataViewSet(viewsets.ViewSet):
                 tmp["out_time"] = geozone['to']
                 tmp["description"] = geozone["description"]
                 qwe.append(tmp)
-            rt_res['unloaded_platforms'] = qwe
-            i += 1
-            res.append(rt_res)
+
+            if qwe:
+                rt_res = {}
+                rt_res['id'] = route_id
+                rt_res['unloaded_platforms'] = qwe
+                res.append(rt_res)
 
         serializer = RouteUnloadsSerializerQwe(res, many=True)
         return Response(serializer.data)
