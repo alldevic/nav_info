@@ -263,8 +263,12 @@ class DataViewSet(viewsets.ViewSet):
             rt_res = {}
             rt_res['id'] = route_id
             qwe = []
-            route = [x for x in serialize_object(
-                all_routes) if x['id'] == route_id][0]
+            try:
+                route = [x for x in serialize_object(
+                    all_routes) if x['id'] == route_id][0]
+            except:
+                continue
+
             for status in soap_res[i]['controlPointStatuses']:
                 tmp = {}
                 tmp['state'] = status['controlPointStatusValue']
