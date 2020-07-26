@@ -249,6 +249,13 @@ class DataViewSet(viewsets.ViewSet):
     def getRouteUnloads(self, request):
         # 20278916
         route_ids = [int(x) for x in request.query_params['ids'].split(',')]
+        try:
+            statuses = [str(x)
+                        for x in request.query_params['statuses'].split(',')]
+            if statuses[0] == '':
+                statuses = None
+        except:
+            statuses = None
         time_in = request.query_params['time_in']
         time_out = request.query_params['time_out']
 
@@ -271,9 +278,16 @@ class DataViewSet(viewsets.ViewSet):
 
             for status in soap_res[i]['controlPointStatuses']:
                 tmp = {}
-                tmp['state'] = status['controlPointStatusValue']
-                geozone = route['routeControlPoints'][int(
-                    status['controlPointID'])]
+                if statuses:
+                    if status['controlPointStatusValue'] in statuses:
+                        tmp['state'] = status['controlPointStatusValue']
+                    else:
+                        continue
+                else:
+                    tmp['state'] = status['controlPointStatusValue']
+                geozone = route['routeControlPoints'][
+                    int(status['controlPointID'])
+                ]
                 tmp['nav_id'] = geozone['geoZoneId']
                 try:
                     tmp['mt_id'] = [

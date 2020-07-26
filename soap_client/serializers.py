@@ -576,11 +576,29 @@ class GetRouteUnloadsRequestSerializer(serializers.Serializer):
                                          input_formats=['%Y-%m-%dT%H:%M:%S'],
                                          default_timezone=pytz.utc)
 
+    statuses = serializers.ListField(label='statuses',
+                                     help_text="Состояния площадок",
+                                     required=False,
+                                     allow_empty=False,
+                                     child=serializers.ChoiceField(label='statuses',
+                                                                   required=False,
+                                                                   allow_blank=False,
+                                                                   choices=[
+                                                                       'Executed', 'NotExecuted', 'ExecutedPartially', 'Performed'],
+                                                                   help_text='Значение статуса прохождения контрольной точки: выполнен (Executed), не выполнен (NotExecuted), частично выполнен (ExecutedPartially), выполняется (Performed)'))
+
+    # statuses = serializers.MultipleChoiceField(label='statuses',
+    #                                            required=False,
+    #                                            choices=[
+    #                                                'Executed', 'NotExecuted', 'ExecutedPartially', 'Performed'],
+    #                                            help_text='Значение статуса прохождения контрольной точки: выполнен (Executed), не выполнен (NotExecuted), частично выполнен (ExecutedPartially), выполняется (Performed)')
+
     class Meta:
         fields = (
             'ids',
             'time_in',
-            'time_out'
+            'time_out',
+            'statuses',
         )
 
 
