@@ -638,7 +638,6 @@ class RouteUnloadsSerializerQwe(serializers.Serializer):
                                   help_text="Идентификатор маршрута")
     unloaded_platforms = serializers.ListField(label='unloaded_platforms',
                                                help_text="Состояния площадок",
-                                               required=False,
                                                child=RouteUnloadsSerializer(label='unloaded_platform',
                                                                             help_text='Отгруженная площадка'))
 
