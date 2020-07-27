@@ -249,6 +249,13 @@ class DataViewSet(viewsets.ViewSet):
     def getRouteUnloads(self, request):
         # 20278916
         route_ids = [int(x) for x in request.query_params['ids'].split(',')]
+        try:
+            statuses = [str(x)
+                        for x in request.query_params['statuses'].split(',')]
+            if statuses[0] == '':
+                statuses = None
+        except:
+            statuses = None
         time_in = request.query_params['time_in']
         time_out = request.query_params['time_out']
 
@@ -268,12 +275,22 @@ class DataViewSet(viewsets.ViewSet):
             except:
                 continue
 
-            qwe = []
-            for status in statuses:
+            soap_route = [x['controlPointStatuses']
+                          for x in soap_res
+                          if x['routeId'] == route_id][0]
+
+            for status in soap_route:
                 tmp = {}
-                tmp['state'] = status['controlPointStatusValue']
-                geozone = route['routeControlPoints'][int(
-                    status['controlPointID'])]
+                if statuses:
+                    if status['controlPointStatusValue'] in statuses:
+                        tmp['state'] = status['controlPointStatusValue']
+                    else:
+                        continue
+                else:
+                    tmp['state'] = status['controlPointStatusValue']
+                geozone = route['routeControlPoints'][
+                    int(status['controlPointID'])
+                ]
                 tmp['nav_id'] = geozone['geoZoneId']
                 try:
                     tmp['mt_id'] = [
@@ -286,11 +303,18 @@ class DataViewSet(viewsets.ViewSet):
                 tmp["description"] = geozone["description"]
                 qwe.append(tmp)
 
-            if qwe:
-                rt_res = {}
-                rt_res['id'] = route_id
-                rt_res['unloaded_platforms'] = qwe
-                res.append(rt_res)
 
-        serializer = RouteUnloadsSerializerQwe(res, many=True)
-        return Response(serializer.data)
+<< << << < HEAD
+
+if qwe:
+    rt_res = {}
+    rt_res['id'] = route_id
+    rt_res['unloaded_platforms'] = qwe
+    res.append(rt_res)
+== == == =
+rt_res['unloaded_platforms'] = qwe
+res.append(rt_res)
+>>>>>> > develop
+
+serializer = RouteUnloadsSerializerQwe(res, many=True)
+return Response(serializer.data)
