@@ -587,12 +587,6 @@ class GetRouteUnloadsRequestSerializer(serializers.Serializer):
                                                                        'Executed', 'NotExecuted', 'ExecutedPartially', 'Performed'],
                                                                    help_text='Значение статуса прохождения контрольной точки: выполнен (Executed), не выполнен (NotExecuted), частично выполнен (ExecutedPartially), выполняется (Performed)'))
 
-    # statuses = serializers.MultipleChoiceField(label='statuses',
-    #                                            required=False,
-    #                                            choices=[
-    #                                                'Executed', 'NotExecuted', 'ExecutedPartially', 'Performed'],
-    #                                            help_text='Значение статуса прохождения контрольной точки: выполнен (Executed), не выполнен (NotExecuted), частично выполнен (ExecutedPartially), выполняется (Performed)')
-
     class Meta:
         fields = (
             'ids',
