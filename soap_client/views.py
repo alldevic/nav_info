@@ -168,6 +168,39 @@ class RawViewSet(viewsets.ViewSet):
 class DataViewSet(viewsets.ViewSet):
     content_negotiation_class = IgnoreClientContentNegotiation
 
+
+
+    @action(detail=False)
+    @swagger_auto_schema(
+        query_serializer=GetPositionRequestSerializer,
+        responses={
+            200: PointSerializer(help_text="Широта и долгота (координата)"),
+            204: 'No Content',
+        })
+    def getAggDevicePosition(self, request):
+        """
+        Метод, возвращающий позицию устройства в определенный момент времени
+        """
+        query_dt = request.query_params['datetime']
+        query_td = int(request.query_params['threshold'])
+        date_from = datetime.strptime(
+            query_dt, '%Y-%m-%dT%H:%M:%S') - timedelta(seconds=query_td)
+        date_to = datetime.strptime(
+            query_dt, '%Y-%m-%dT%H:%M:%S') + timedelta(seconds=query_td)
+        soap_res = soap_client.service.getAggTable(
+            int(request.query_params['device']),
+            date_from.strftime('%Y-%m-%dT%H:%M:%S'),
+            date_to.strftime('%Y-%m-%dT%H:%M:%S'),
+            0,
+            0
+        )
+        try:
+            serializer = PointSerializer(
+                soap_res.rows[0].primary.value.point)
+            return Response(serializer.data)
+        except IndexError:
+            return Response(status=204)
+
     @action(detail=False)
     @swagger_auto_schema(
         query_serializer=GetPositionRequestSerializer,
