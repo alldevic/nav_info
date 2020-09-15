@@ -29,8 +29,6 @@ from soap_client.serializers import (ChannelDescriptorSerializer,
                                      GetRouteUnloadsRequestSerializer,
                                      RouteUnloadsSerializer,
                                      RouteUnloadsSerializerQwe)
-import json
-
 session = Session()
 session.auth = HTTPBasicAuth(settings.NAV_USER, settings.NAV_PASS)
 
@@ -38,7 +36,10 @@ soap_client = zeep.Client(settings.NAV_HOST,
                           transport=Transport(session=session,
                                               cache=InMemoryCache()))
 
-navmtids = [x for x in NavMtId.objects.all()]
+try:
+    navmtids = [x for x in NavMtId.objects.all()]
+except:
+    navmtids = []
 
 
 class RawViewSet(viewsets.ViewSet):
