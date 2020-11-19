@@ -135,6 +135,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+DEFAULT_HASHING_ALGORITHM = 'sha1'
 
 LANGUAGE_CODE = get_env('LANGUAGE_CODE', 'en-us')
 
@@ -220,4 +221,14 @@ LOGGING = {
             'propagate': False,
         },
     },
+}
+
+Q_CLUSTER = {
+    'name': 'DjangORM',
+    'workers': 2,
+    'retry': 3600,
+    'timeout': 3000,
+    'queue_limit': 50,
+    'bulk': 10,
+    'orm': 'default'
 }

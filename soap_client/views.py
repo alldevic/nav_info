@@ -32,9 +32,9 @@ from soap_client.serializers import (ChannelDescriptorSerializer,
 session = Session()
 session.auth = HTTPBasicAuth(settings.NAV_USER, settings.NAV_PASS)
 
-soap_client = zeep.Client(settings.NAV_HOST,
-                          transport=Transport(session=session,
-                                              cache=InMemoryCache()))
+soap_client = zeep.AsyncClient(settings.NAV_HOST,
+                               transport=Transport(session=session,
+                                                   cache=InMemoryCache()))
 
 try:
     navmtids = [x for x in NavMtId.objects.all()]
@@ -51,12 +51,12 @@ class RawViewSet(viewsets.ViewSet):
                               help_text="Структура, содержащая данные по автомобилю")
     })
     @method_decorator(cache_page(settings.CACHE_LONG_TTL))
-    def getAllDevices(self, request):
+    async def getAllDevices(self, request):
         """
         Метод возвращает список автомобилей компании, к которой принадлежит пользователь, осуществляющий запрос
         """
 
-        soap_res = soap_client.service.getAllDevices()
+        soap_res = await soap_client.service.getAllDevices()
         serializer = DeviceSerializer(soap_res, many=True)
         return Response(serializer.data)
 
@@ -66,12 +66,12 @@ class RawViewSet(viewsets.ViewSet):
                               help_text="Структура, содержащая данные по водителю")
     })
     @method_decorator(cache_page(settings.CACHE_LONG_TTL))
-    def getAllDrivers(self, request):
+    async def getAllDrivers(self, request):
         """
         Метод возвращает список водителей, определенных для компании. Идентификаторы сквозные
         """
 
-        soap_res = soap_client.service.getAllDrivers()
+        soap_res = await soap_client.service.getAllDrivers()
         serializer = DriverSerializer(soap_res, many=True)
         return Response(serializer.data)
 
@@ -81,12 +81,12 @@ class RawViewSet(viewsets.ViewSet):
                                    help_text="Структура содержит данные по группе (клиенту)")
     })
     @method_decorator(cache_page(settings.CACHE_LONG_TTL))
-    def getAllDeviceGroups(self, request):
+    async def getAllDeviceGroups(self, request):
         """
         Метод возвращает все группы компании, к которой принадлежит пользователь, осуществляющий запрос
         """
 
-        soap_res = soap_client.service.getAllDeviceGroups()
+        soap_res = await soap_client.service.getAllDeviceGroups()
         serializer = DeviceGroupSerializer(soap_res, many=True)
         return Response(serializer.data)
 
@@ -96,12 +96,12 @@ class RawViewSet(viewsets.ViewSet):
                                help_text="Структура, содержащая данные по геозоне")
     })
     @method_decorator(cache_page(settings.CACHE_LONG_TTL))
-    def getAllGeoZones(self, request):
+    async def getAllGeoZones(self, request):
         """
         Метод возвращает список геозон, определенных для компании. Идентификаторы сквозные
         """
 
-        soap_res = soap_client.service.getAllGeoZones()
+        soap_res = await soap_client.service.getAllGeoZones()
         serializer = GeoZoneSerializer(soap_res, many=True)
         return Response(serializer.data)
 
@@ -112,7 +112,7 @@ class RawViewSet(viewsets.ViewSet):
             200: RouteSerializer(many=True,
                                  help_text="Структура, описывающая набор данных, характеризующих маршрут")
         })
-    def getAllRoutes(self, request):
+    async def getAllRoutes(self, request):
         """
         Метод позволяет получить данные по всем маршрутам, содержащимся в базе данных системы (в соответствии с правами пользователя) за заданный промежуток времени.
         В ответ метод возвращает множество структур типа Route, описывающих маршруты, начало которых попало в заданный промежуток. Метод возвращает не более 1000 маршрутов.
@@ -120,7 +120,7 @@ class RawViewSet(viewsets.ViewSet):
         Даты в формате YYYY-MM-DDTHH:MM:SS
         """
 
-        soap_res = soap_client.service.getAllRoutes(
+        soap_res = await soap_client.service.getAllRoutes(
             request.query_params['ffrom'], request.query_params['to'])
         serializer = RouteSerializer(soap_res, many=True)
         return Response(serializer.data)
@@ -132,13 +132,13 @@ class RawViewSet(viewsets.ViewSet):
             200: RouteStatusSerializer(many=True,
                                        help_text="Структура, описывающая статус прохождения маршрута")
         })
-    def getRouteStatuses(self, request):
+    async def getRouteStatuses(self, request):
         """
         Методу передается список идентификаторов маршрутов. В ответ метод возвращает список структур RouteStatus, содержащих статусы прохождения всех запрошенных маршрутов.
         В случае ошибки метод возвращает пустое значение
         """
 
-        soap_res = soap_client.service.getRouteStatuses(
+        soap_res = await soap_client.service.getRouteStatuses(
             [int(x) for x in request.query_params['routeIds'].split(',')])
         serializer = RouteStatusSerializer(soap_res, many=True)
         return Response(serializer.data)
@@ -151,14 +151,14 @@ class RawViewSet(viewsets.ViewSet):
                                              help_text="Структура, содержащая данные по каналу")
         })
     @method_decorator(cache_page(settings.CACHE_LONG_TTL))
-    def getChannelDescriptors(self, request):
+    async def getChannelDescriptors(self, request):
         """
         Метод возвращает список доступных каналов для запроса по данному устройству.
         Идентификаторы сквозные (один и тот же канал возвращается для разных устройств,
         если его запрос по этому устройству возможен)
         """
 
-        soap_res = soap_client.service.getChannelDescriptors(
+        soap_res = await soap_client.service.getChannelDescriptors(
             request.query_params['device']
         )
         serializer = ChannelDescriptorSerializer(soap_res, many=True)
@@ -208,7 +208,7 @@ class DataViewSet(viewsets.ViewSet):
             200: PointSerializer(help_text="Широта и долгота (координата)"),
             204: 'No Content',
         })
-    def getDevicePosition(self, request):
+    async def getDevicePosition(self, request):
         """
         Метод, возвращающий позицию устройства в определенный момент времени
         """
@@ -218,7 +218,7 @@ class DataViewSet(viewsets.ViewSet):
             query_dt, '%Y-%m-%dT%H:%M:%S') - timedelta(seconds=query_td)
         date_to = datetime.strptime(
             query_dt, '%Y-%m-%dT%H:%M:%S') + timedelta(seconds=query_td)
-        soap_res = soap_client.service.getFlatTableSimple(
+        soap_res = await soap_client.service.getFlatTableSimple(
             int(request.query_params['device']),
             date_from.strftime('%Y-%m-%dT%H:%M:%S'),
             date_to.strftime('%Y-%m-%dT%H:%M:%S'),
@@ -239,14 +239,14 @@ class DataViewSet(viewsets.ViewSet):
         responses={
             200: CurrentRoutesSerializer(help_text="Текущий марщрут", many=True),
         })
-    def getCurrentRoutes(self, request):
+    async def getCurrentRoutes(self, request):
         """
-        Cегодняшний маршруты, которые необходимо пройти 
+        Cегодняшний маршруты, которые необходимо пройти
         """
         time_in = request.query_params['time_in']
         time_out = request.query_params['time_out']
 
-        all_routes = soap_client.service.getAllRoutes(time_in, time_out)
+        all_routes = await soap_client.service.getAllRoutes(time_in, time_out)
         all_routes = serialize_object(all_routes)
         res = []
         for route in all_routes:
@@ -280,7 +280,7 @@ class DataViewSet(viewsets.ViewSet):
         responses={
             200: RouteUnloadsSerializerQwe(help_text="Текущий марщрут", many=True),
         })
-    def getRouteUnloads(self, request):
+    async def getRouteUnloads(self, request):
         # 20278916
         route_ids = [int(x) for x in request.query_params['ids'].split(',')]
         try:
@@ -294,9 +294,9 @@ class DataViewSet(viewsets.ViewSet):
         time_out = request.query_params['time_out']
 
         soap_res = serialize_object(
-            soap_client.service.getRouteStatuses(route_ids))
+            await soap_client.service.getRouteStatuses(route_ids))
 
-        all_routes = soap_client.service.getAllRoutes(time_in, time_out)
+        all_routes = await soap_client.service.getAllRoutes(time_in, time_out)
 
         res = []
         for route_id in route_ids:
