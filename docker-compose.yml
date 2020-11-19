@@ -62,7 +62,7 @@ services:
         ipv4_address: 172.20.0.8
   
   qcluster:
-    image: nav-info_backend
+    image: nav_info_backend
     container_name: nav_qcluster
     env_file: .env
     user: ${CURRENT_UID}
