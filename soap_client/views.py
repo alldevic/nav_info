@@ -27,7 +27,6 @@ from soap_client.serializers import (ChannelDescriptorSerializer,
                                      PointSerializer, RouteSerializer,
                                      RouteStatusSerializer,
                                      GetRouteUnloadsRequestSerializer,
-                                     RouteUnloadsSerializer,
                                      RouteUnloadsSerializerQwe)
 session = Session()
 session.auth = HTTPBasicAuth(settings.NAV_USER, settings.NAV_PASS)
@@ -53,7 +52,8 @@ class RawViewSet(viewsets.ViewSet):
     @method_decorator(cache_page(settings.CACHE_LONG_TTL))
     def getAllDevices(self, request):
         """
-        Метод возвращает список автомобилей компании, к которой принадлежит пользователь, осуществляющий запрос
+        Метод возвращает список автомобилей компании,
+        к которой принадлежит пользователь, осуществляющий запрос
         """
 
         soap_res = soap_client.service.getAllDevices()
@@ -68,7 +68,8 @@ class RawViewSet(viewsets.ViewSet):
     @method_decorator(cache_page(settings.CACHE_LONG_TTL))
     def getAllDrivers(self, request):
         """
-        Метод возвращает список водителей, определенных для компании. Идентификаторы сквозные
+        Метод возвращает список водителей, определенных для компании.
+        Идентификаторы сквозные
         """
 
         soap_res = soap_client.service.getAllDrivers()
@@ -83,7 +84,8 @@ class RawViewSet(viewsets.ViewSet):
     @method_decorator(cache_page(settings.CACHE_LONG_TTL))
     def getAllDeviceGroups(self, request):
         """
-        Метод возвращает все группы компании, к которой принадлежит пользователь, осуществляющий запрос
+        Метод возвращает все группы компании,
+        к которой принадлежит пользователь, осуществляющий запрос
         """
 
         soap_res = soap_client.service.getAllDeviceGroups()
@@ -98,7 +100,8 @@ class RawViewSet(viewsets.ViewSet):
     @method_decorator(cache_page(settings.CACHE_LONG_TTL))
     def getAllGeoZones(self, request):
         """
-        Метод возвращает список геозон, определенных для компании. Идентификаторы сквозные
+        Метод возвращает список геозон, определенных для компании.
+        Идентификаторы сквозные
         """
 
         soap_res = soap_client.service.getAllGeoZones()
@@ -114,9 +117,14 @@ class RawViewSet(viewsets.ViewSet):
         })
     def getAllRoutes(self, request):
         """
-        Метод позволяет получить данные по всем маршрутам, содержащимся в базе данных системы (в соответствии с правами пользователя) за заданный промежуток времени.
-        В ответ метод возвращает множество структур типа Route, описывающих маршруты, начало которых попало в заданный промежуток. Метод возвращает не более 1000 маршрутов.
-        В случае ошибки или, если в заданный промежуток времени не попало ни одного маршрута, метод возвращает пустое значение.
+        Метод позволяет получить данные по всем маршрутам,
+        содержащимся в базе данных системы
+        (в соответствии с правами пользователя) за заданный промежуток времени.
+        В ответ метод возвращает множество структур типа Route,
+        описывающих маршруты, начало которых попало в заданный промежуток.
+        Метод возвращает не более 1000 маршрутов.
+        В случае ошибки или, если в заданный промежуток времени не попало
+        ни одного маршрута, метод возвращает пустое значение.
         Даты в формате YYYY-MM-DDTHH:MM:SS
         """
 
@@ -134,7 +142,9 @@ class RawViewSet(viewsets.ViewSet):
         })
     def getRouteStatuses(self, request):
         """
-        Методу передается список идентификаторов маршрутов. В ответ метод возвращает список структур RouteStatus, содержащих статусы прохождения всех запрошенных маршрутов.
+        Методу передается список идентификаторов маршрутов.
+        В ответ метод возвращает список структур RouteStatus,
+        содержащих статусы прохождения всех запрошенных маршрутов.
         В случае ошибки метод возвращает пустое значение
         """
 
@@ -153,9 +163,10 @@ class RawViewSet(viewsets.ViewSet):
     @method_decorator(cache_page(settings.CACHE_LONG_TTL))
     def getChannelDescriptors(self, request):
         """
-        Метод возвращает список доступных каналов для запроса по данному устройству.
-        Идентификаторы сквозные (один и тот же канал возвращается для разных устройств,
-        если его запрос по этому устройству возможен)
+        Метод возвращает список доступных каналов для запроса по данному
+        устройству.
+        Идентификаторы сквозные (один и тот же канал возвращается для разных
+        устройств, если его запрос по этому устройству возможен)
         """
 
         soap_res = soap_client.service.getChannelDescriptors(
@@ -167,8 +178,6 @@ class RawViewSet(viewsets.ViewSet):
 
 class DataViewSet(viewsets.ViewSet):
     content_negotiation_class = IgnoreClientContentNegotiation
-
-
 
     @action(detail=False)
     @swagger_auto_schema(
@@ -278,7 +287,8 @@ class DataViewSet(viewsets.ViewSet):
     @swagger_auto_schema(
         query_serializer=GetRouteUnloadsRequestSerializer,
         responses={
-            200: RouteUnloadsSerializerQwe(help_text="Текущий марщрут", many=True),
+            200: RouteUnloadsSerializerQwe(help_text="Текущий марщрут",
+                                           many=True),
         })
     def getRouteUnloads(self, request):
         # 20278916
@@ -322,6 +332,9 @@ class DataViewSet(viewsets.ViewSet):
                         continue
                 else:
                     tmp['state'] = status['controlPointStatusValue']
+
+                if int(status['controlPointID'] >= len(route['routeControlPoints'])):
+                    continue
                 geozone = route['routeControlPoints'][
                     int(status['controlPointID'])
                 ]
