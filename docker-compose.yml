@@ -54,6 +54,7 @@ services:
   redis:
     container_name: nav_redis
     image: redis:6.0-alpine3.12
+    restart: on-failure
     depends_on:
       - backend
       - postgres
