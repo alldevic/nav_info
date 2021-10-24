@@ -76,6 +76,7 @@ else
         --access-logfile - \
         --name nav_info \
         --bind 0.0.0.0:8000 \
+        --max-requests 200 \
         --workers=3
 fi
 fi
